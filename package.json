@@ -1,6 +1,9 @@
 {
-  "name": "nest-keycloak-connect",
-  "version": "1.0.7",
+  "name": "@jeff-tian/nest-keycloak-connect",
+  "publishConfig": {
+    "access": "public"
+  },
+  "version": "0.0.0-development",
   "description": "keycloak-nodejs-connect module for Nest",
   "author": "John Joshua Ferrer <johnjoshuaferrer@disroot.org>",
   "license": "MIT",
@@ -11,7 +14,8 @@
     "postbuild": "cpr README.md dist/ && cpr LICENSE dist/ && cpr package.json dist/",
     "npm:publish": "npm run build && cd dist && npm publish",
     "format": "prettier --write \"src/**/*.ts\"",
-    "lint": "tslint -p tsconfig.json -c tslint.json"
+    "lint": "tslint -p tsconfig.json -c tslint.json",
+    "semantic-release": "semantic-release"
   },
   "keywords": [
     "nestjs",
@@ -20,9 +24,9 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/ferrerojosh/nest-keycloak-connect"
+    "url": "https://github.com/jeff-tian/nest-keycloak-connect"
   },
-  "bugs": "https://github.com/ferrerojosh/nest-keycloak-connect/issues",
+  "bugs": "https://github.com/jeff-tian/nest-keycloak-connect/issues",
   "peerDependencies": {
     "@nestjs/common": "^6.0.0",
     "reflect-metadata": "^0.1.12",
@@ -40,6 +44,7 @@
     "reflect-metadata": "^0.1.12",
     "rimraf": "^3.0.2",
     "rxjs": "^6.0.0",
+    "semantic-release": "^17.0.7",
     "ts-node": "^8.6.2",
     "typescript": "^3.8.3"
   }
