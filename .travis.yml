@@ -8,6 +8,7 @@ env:
   ci: true
 script:
   - npm test
+  - npm run build
 
 jobs:
   include:
