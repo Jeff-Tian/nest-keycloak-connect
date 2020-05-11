@@ -22,8 +22,8 @@ export class AuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const jwt =
-      this.extractJwt(request.headers) ||
-      AuthGuard.extractJwtFromCookie(request.cookies);
+      AuthGuard.extractJwtFromCookie(request.cookies) ??
+      this.extractJwt(request.headers);
     const result = await this.keycloak.grantManager.validateAccessToken(jwt);
 
     if (typeof result === 'string') {
