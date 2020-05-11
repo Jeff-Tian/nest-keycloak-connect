@@ -51,6 +51,6 @@ export class AuthGuard implements CanActivate {
   }
 
   static extractJwtFromCookie(cookies: { [key: string]: string }) {
-    return cookies.keycloakJWT;
+    return cookies?.keycloakJWT;
   }
 }
