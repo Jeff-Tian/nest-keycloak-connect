@@ -1,5 +1,5 @@
 import { DynamicModule, Module, Provider } from '@nestjs/common';
-import Keycloak from 'keycloak-connect';
+import * as KeycloakConnect from 'keycloak-connect';
 import { KEYCLOAK_CONNECT_OPTIONS, KEYCLOAK_INSTANCE } from './constants';
 import { KeycloakConnectModuleAsyncOptions } from './interface/keycloak-connect-module-async-options.interface';
 import { KeycloakConnectOptionsFactory } from './interface/keycloak-connect-options-factory.interface';
@@ -7,33 +7,37 @@ import { KeycloakConnectOptions } from './interface/keycloak-connect-options.int
 
 export * from './decorators/resource.decorator';
 export * from './decorators/scopes.decorator';
+export * from './decorators/roles.decorator';
+export * from './decorators/allow-any-role.decorator';
 export * from './guards/auth.guard';
 export * from './guards/resource.guard';
+export * from './guards/role.guard';
 
 @Module({})
 export class KeycloakConnectModule {
   public static register(opts: KeycloakConnectOptions): DynamicModule {
+    const optsProvider = {
+      provide: KEYCLOAK_CONNECT_OPTIONS,
+      useValue: opts,
+    };
+
     return {
       module: KeycloakConnectModule,
-      providers: [
-        {
-          provide: KEYCLOAK_CONNECT_OPTIONS,
-          useValue: opts,
-        },
-        this.keycloakProvider,
-      ],
-      exports: [this.keycloakProvider],
+      providers: [optsProvider, this.keycloakProvider],
+      exports: [optsProvider, this.keycloakProvider],
     };
   }
 
   public static registerAsync(
     opts: KeycloakConnectModuleAsyncOptions,
   ): DynamicModule {
+    const optsProvider = this.createConnectProviders(opts);
+
     return {
       module: KeycloakConnectModule,
       imports: opts.imports || [],
-      providers: [this.createConnectProviders(opts), this.keycloakProvider],
-      exports: [this.keycloakProvider],
+      providers: [optsProvider, this.keycloakProvider],
+      exports: [optsProvider, this.keycloakProvider],
     };
   }
 
@@ -76,7 +80,7 @@ export class KeycloakConnectModule {
     provide: KEYCLOAK_INSTANCE,
     useFactory: (opts: KeycloakConnectOptions) => {
       const keycloakOpts: any = opts;
-      const keycloak: any = new Keycloak({}, keycloakOpts);
+      const keycloak: any = new KeycloakConnect.default({}, keycloakOpts);
 
       // Access denied is called, add a flag to request so our resource guard knows
       keycloak.accessDenied = (req: any, res: any, next: any) => {

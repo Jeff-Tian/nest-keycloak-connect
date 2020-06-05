@@ -5,8 +5,9 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Keycloak } from 'keycloak-connect';
-import { KEYCLOAK_INSTANCE } from '../constants';
+import * as KeycloakConnect from 'keycloak-connect';
+import { KEYCLOAK_INSTANCE, KEYCLOAK_CONNECT_OPTIONS } from '../constants';
+import { KeycloakConnectOptions } from '../interface/keycloak-connect-options.interface';
 
 /**
  * An authentication guard. Will return a 401 unauthorized when it is unable to
@@ -16,19 +17,23 @@ import { KEYCLOAK_INSTANCE } from '../constants';
 export class AuthGuard implements CanActivate {
   constructor(
     @Inject(KEYCLOAK_INSTANCE)
-    private keycloak: Keycloak,
+    private keycloak: KeycloakConnect.Keycloak,
+    @Inject(KEYCLOAK_CONNECT_OPTIONS)
+    private keycloakOpts: KeycloakConnectOptions,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const jwt =
-      AuthGuard.extractJwtFromCookie(request.cookies) ??
+      this.extractJwtFromCookie(request.cookies) ??
       this.extractJwt(request.headers);
     const result = await this.keycloak.grantManager.validateAccessToken(jwt);
 
     if (typeof result === 'string') {
       // Attach user info object
       request.user = await this.keycloak.grantManager.userInfo(jwt);
+      // Attach raw access token JWT extracted from bearer/cookie
+      request.accessTokenJWT = jwt;
       return true;
     }
 
@@ -50,7 +55,9 @@ export class AuthGuard implements CanActivate {
     return auth[1];
   }
 
-  static extractJwtFromCookie(cookies: { [key: string]: string }) {
-    return cookies?.keycloakJWT;
+  extractJwtFromCookie(cookies: { [key: string]: string }) {
+    return cookies
+      ? cookies[this.keycloakOpts.cookieKey || 'KEYCLOAK_JWT']
+      : undefined;
   }
 }
